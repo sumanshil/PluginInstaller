@@ -68,5 +68,6 @@ public class PluginInstallerTest {
 		PluginInstallationResult result = PluginInstallationManager.getInstance().install(input);
 	    Assert.assertTrue(result.getInstallationStatus() == InstallationStatus.FAILED);
 	    Assert.assertTrue(result.getInstallationFailureCode() == InstallationFailureCode.INVALID_INPUT);
+	    Assert.assertTrue(result.getInstalledPlugins() == null);
 	}
 }
