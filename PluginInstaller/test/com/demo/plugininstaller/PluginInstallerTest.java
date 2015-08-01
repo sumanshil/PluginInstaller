@@ -67,7 +67,20 @@ public class PluginInstallerTest {
 		};
 		PluginInstallationResult result = PluginInstallationManager.getInstance().install(input);
 	    Assert.assertTrue(result.getInstallationStatus() == InstallationStatus.FAILED);
-	    Assert.assertTrue(result.getInstallationFailureCode() == InstallationFailureCode.INVALID_INPUT);
+	    Assert.assertTrue(result.getInstallationFailureCode() == InstallationFailureCode.INVALID_FORMAT);
+	    Assert.assertTrue(result.getInstalledPlugins() == null);
+	}
+	
+	@Test
+	public void testInvalidDuplicateEntryTest(){
+		String[] input = new String[] {
+				"A:B",
+				"B:C",
+				"A:"
+		};
+		PluginInstallationResult result = PluginInstallationManager.getInstance().install(input);
+	    Assert.assertTrue(result.getInstallationStatus() == InstallationStatus.FAILED);
+	    Assert.assertTrue(result.getInstallationFailureCode() == InstallationFailureCode.DUPLICATE_ENTRY);
 	    Assert.assertTrue(result.getInstalledPlugins() == null);
 	}
 }

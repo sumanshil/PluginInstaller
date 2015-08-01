@@ -1,6 +1,7 @@
 package com.demo.plugininstaller.common;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class will contain the installation result.
@@ -14,11 +15,11 @@ public class PluginInstallationResult {
     /**
      * This will contain the installed plugin names in the order the plugins were installed
      */
-    private List<String> installedPlugins;
+    private Set<String> installedPlugins;
     
     private PluginInstallationResult(InstallationFailureCode installationFailureCode,
     		                         InstallationStatus installationStatus,
-    		                         List<String> installedPlugins) {
+    		                         Set<String> installedPlugins) {
     	this.installationFailureCode = installationFailureCode;
     	this.installationStatus = installationStatus;
     	this.installedPlugins = installedPlugins;
@@ -27,15 +28,15 @@ public class PluginInstallationResult {
     
     public static PluginInstallationResult getInstance(InstallationFailureCode installationFailureCode,
     		                                           InstallationStatus installationStatus,
-    		                                           List<String> installedPlugins){
+    		                                           Set<String> installedPlugins){
     	return new PluginInstallationResult(installationFailureCode, installationStatus, installedPlugins);
     }
     
-	public List<String> getInstalledPlugins() {
+	public Set<String> getInstalledPlugins() {
 		return installedPlugins;
 	}
 
-	public void setInstalledPlugins(List<String> installedPlugins) {
+	public void setInstalledPlugins(Set<String> installedPlugins) {
 		this.installedPlugins = installedPlugins;
 	}
 
