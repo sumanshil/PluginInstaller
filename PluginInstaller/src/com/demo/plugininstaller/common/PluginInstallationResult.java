@@ -15,11 +15,11 @@ public class PluginInstallationResult {
     /**
      * This will contain the installed plugin names in the order the plugins were installed
      */
-    private Set<String> installedPlugins;
+    private String[] installedPlugins;
     
     private PluginInstallationResult(InstallationFailureCode installationFailureCode,
     		                         InstallationStatus installationStatus,
-    		                         Set<String> installedPlugins) {
+    		                         String[] installedPlugins) {
     	this.installationFailureCode = installationFailureCode;
     	this.installationStatus = installationStatus;
     	this.installedPlugins = installedPlugins;
@@ -28,15 +28,15 @@ public class PluginInstallationResult {
     
     public static PluginInstallationResult getInstance(InstallationFailureCode installationFailureCode,
     		                                           InstallationStatus installationStatus,
-    		                                           Set<String> installedPlugins){
+    		                                           String[] installedPlugins){
     	return new PluginInstallationResult(installationFailureCode, installationStatus, installedPlugins);
     }
     
-	public Set<String> getInstalledPlugins() {
+	public String[] getInstalledPlugins() {
 		return installedPlugins;
 	}
 
-	public void setInstalledPlugins(Set<String> installedPlugins) {
+	public void setInstalledPlugins(String[] installedPlugins) {
 		this.installedPlugins = installedPlugins;
 	}
 

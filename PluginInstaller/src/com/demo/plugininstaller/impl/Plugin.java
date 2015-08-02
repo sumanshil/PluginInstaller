@@ -2,6 +2,7 @@ package com.demo.plugininstaller.impl;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Plugin implements Comparable<Plugin> {
@@ -35,7 +36,7 @@ public class Plugin implements Comparable<Plugin> {
     		String dependencies = arr[1];
     		String[] dependencyArr = dependencies.split(",");
     		for ( String dependencyString : dependencyArr) {
-    			this.dependencies.add(dependencyString);
+    			this.dependencies.add(dependencyString.trim());
     		}
     	}
     	return this;
@@ -73,5 +74,14 @@ public class Plugin implements Comparable<Plugin> {
 	
 	public List<String> getDependencies() {
 		return dependencies;
+	}
+
+	public void removeDependency(String dependencyName) {
+		Iterator<String> iterator = dependencies.iterator();
+		while (iterator.hasNext()) {
+			if (iterator.next().intern().equals(dependencyName)){
+				iterator.remove();
+			}
+		}		
 	}
 }

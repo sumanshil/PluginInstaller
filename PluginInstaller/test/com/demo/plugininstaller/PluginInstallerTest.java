@@ -21,6 +21,7 @@ public class PluginInstallerTest {
 		PluginInstallationResult result = PluginInstallationManager.getInstance().install(input);
 	    Assert.assertTrue(result.getInstallationStatus() == InstallationStatus.SUCCESSFUL);
 	    Assert.assertTrue(result.getInstallationFailureCode() == null);
+	    Assert.assertTrue(result.getInstalledPlugins() != null);
 	}
 	
 	@Test
@@ -38,6 +39,51 @@ public class PluginInstallerTest {
 	}
 
 	@Test
+	public void testSuccessfullInstallationTest3(){
+		String[] input = new String[] {
+				"KittenService:",
+				 "Leetmeme: Cyberportal",
+				 "Cyberportal: Ice",
+				 "CamelCaser: KittenService",
+				 "Fraudstream: Leetmeme",
+				 "Ice:"
+		};
+		PluginInstallationResult result = PluginInstallationManager.getInstance().install(input);
+	    Assert.assertTrue(result.getInstallationStatus() == InstallationStatus.SUCCESSFUL);
+	    Assert.assertTrue(result.getInstallationFailureCode() == null);
+	    Assert.assertTrue(result.getInstalledPlugins() != null);
+	    Assert.assertTrue(result.getInstalledPlugins().length == 6);
+	    
+	    int kitenServiceIndex = 0;
+	    int camelCaserIndex = 0;
+	    int leetMemeIndex = 0;
+	    int cyberPortalIndex  = 0;
+	    int fraudSteamIndex = 0;
+	    int iceIndex = 0;
+	    int index = 0;
+	    for (String str : result.getInstalledPlugins()) {
+	    	if ("KittenService".equals(str)){
+	    		kitenServiceIndex = index;
+	    	} else if ("Leetmeme".equals(str)){
+	    		leetMemeIndex = index;
+	    	} else if ("Cyberportal".equals(str)){
+	    		cyberPortalIndex = index;
+	    	} else if ("Ice".equals(str)){
+	    		iceIndex = index;
+	    	} else if ("CamelCaser".equals(str)){
+	    		camelCaserIndex = index;
+	    	} else if ("Fraudstream".equals(str)){
+	    		fraudSteamIndex = index;
+	    	}	    
+	    	index++;
+	    }
+	    Assert.assertTrue(kitenServiceIndex < camelCaserIndex);
+	    Assert.assertTrue(leetMemeIndex > cyberPortalIndex);
+	    Assert.assertTrue(iceIndex < cyberPortalIndex);
+	    Assert.assertTrue(leetMemeIndex < fraudSteamIndex);
+	}
+
+	@Test
 	public void testCyclicDependencyInstallationTest(){
 		String[] input = new String[] {
 				"A:B",
@@ -52,7 +98,7 @@ public class PluginInstallerTest {
 	public void testMissingDependencyInstallationTest(){
 		String[] input = new String[] {
 				"A:B",
-				"B:A"
+				"B:C"
 		};
 		PluginInstallationResult result = PluginInstallationManager.getInstance().install(input);
 	    Assert.assertTrue(result.getInstallationStatus() == InstallationStatus.FAILED);
@@ -83,4 +129,16 @@ public class PluginInstallerTest {
 	    Assert.assertTrue(result.getInstallationFailureCode() == InstallationFailureCode.DUPLICATE_ENTRY);
 	    Assert.assertTrue(result.getInstalledPlugins() == null);
 	}
+	
+	@Test
+	public void testInvalidInputInstallationTest1(){
+		String[] input = new String[] {
+				"KittenService:","Leetmeme: Cyberportal","Cyberportal: Ice","CamelCaser: KittenService","Fraudstream:","Ice: Leetmeme"
+		};
+		PluginInstallationResult result = PluginInstallationManager.getInstance().install(input);
+	    Assert.assertTrue(result.getInstallationStatus() == InstallationStatus.FAILED);
+	    Assert.assertTrue(result.getInstallationFailureCode() == InstallationFailureCode.CYCLIC_DEPENDEBCY);
+	    Assert.assertTrue(result.getInstalledPlugins() == null);
+	}
+
 }

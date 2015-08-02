@@ -2,9 +2,13 @@ package com.demo.plugininstaller.impl;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.demo.plugininstaller.common.InstallationFailureCode;
 import com.demo.plugininstaller.common.InstallationStatus;
@@ -17,11 +21,13 @@ public class PluginInstallationManagerImpl extends PluginInstallationManager {
 	public PluginInstallationResult install(String[] plugins) {	
 		
 		List<Plugin> pluginSet = new ArrayList<>();
+		Set<String> pluginNames = new HashSet<>();
 		for (String plugin : plugins){
 			
 			Plugin pluginInstance= null;
 			try {
 				pluginInstance = Plugin.getInstance().populate(plugin);
+				pluginNames.add(pluginInstance.getName());
 			} catch (InvalidAlgorithmParameterException e) {
 				   return PluginInstallationResult.getInstance(InstallationFailureCode.INVALID_FORMAT,
                            InstallationStatus.FAILED,
@@ -34,38 +40,52 @@ public class PluginInstallationManagerImpl extends PluginInstallationManager {
 			}
 			pluginSet.add(pluginInstance);
 		}
-		
-		InstallationFailureCode failureCode = validate(pluginSet);
-		if ( failureCode != null ) {
-		   return PluginInstallationResult.getInstance(failureCode,
-				                                       InstallationStatus.FAILED,
-				                                       null);	
+		// check for missing dependency 
+		for (Plugin plugin : pluginSet) {
+			for ( String dependencyName : plugin.getDependencies()) {
+				if (!pluginNames.contains(dependencyName)){
+					   return PluginInstallationResult.getInstance(InstallationFailureCode.MISSING_DEPENDENCY,
+	                           InstallationStatus.FAILED,
+	                           null);	 									
+				}
+			}
 		}
 
-		Set<Plugin> installed = new HashSet<Plugin>();
+		Set<Plugin> installed = new LinkedHashSet<Plugin>();
 		while (true) {
 			if (installationComplete(pluginSet)){
 				break;
 			}
 			boolean installedFlag = false;
+			Set<Plugin> installedCurrentCycle = new LinkedHashSet<Plugin>();
 			for (Plugin plugin : pluginSet) {
 				if ( isReadyToBeInstalled(plugin, installed)
-					 && ! installed.contains(plugin)	) {
+					 && ! installed.contains(plugin)) {
 					installed.add(plugin);
+					installedCurrentCycle.add(plugin);
 					installedFlag = true;
 					plugin.setInstalled(true);
 				}
 			}
 			if (!installedFlag) {
 				return PluginInstallationResult.
-						getInstance(InstallationFailureCode.MISSING_DEPENDENCY,
+						getInstance(InstallationFailureCode.CYCLIC_DEPENDEBCY,
 								    InstallationStatus.FAILED, null);
+			}
+			// remove installed plugins from dependency list
+			for (Plugin plugin : installedCurrentCycle ) {
+				for ( Plugin plugin2 : pluginSet ){
+					plugin2.removeDependency(plugin.getName());
+				}
 			}
 				
 		}
-		Set<String> retVal = new HashSet<>();
+		
+		// set up the final result
+		String[] retVal = new String[installed.size()];
+		int index = 0;
 		for (Plugin plugin : installed) {
-			retVal.add(plugin.getName());
+			retVal[index++]= plugin.getName();
 		}
 		
 		PluginInstallationResult result =  PluginInstallationResult.
@@ -83,7 +103,10 @@ public class PluginInstallationManagerImpl extends PluginInstallationManager {
 	}
 
 	private boolean isReadyToBeInstalled(Plugin plugin, Set<Plugin> installed) {
-		return plugin.getDependencies().size() == 0 || installed.contains(plugin) ;
+		if ( plugin.getDependencies().size() == 0 ) { 
+			return true;
+		} 
+		return false;
 	}
 
 
